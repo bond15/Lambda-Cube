@@ -1,6 +1,6 @@
-module UTLC.EvalUTLC where
+module UTLC.Eval where
 
-import UTLC.NamedUTLC (Term(TmApp, TmVar, TmAbs), subst)
+import UTLC.Named
 
 -- Operational semantics
 -- values are a subset of terms
@@ -25,4 +25,6 @@ eval (TmApp (TmAbs x t) v) | isVal v = subst x v t
 eval (TmApp v t) | isVal v = (TmApp v (eval t))
 -- eval_App_1
 eval (TmApp t1 t2) = (TmApp (eval t1) t2)
+-- done
+eval v | isVal v = v
 
