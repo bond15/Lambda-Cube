@@ -18,8 +18,14 @@ fls = TmAbs "x" $ TmAbs "y" $ TmVar "y"
 cond :: Term -- \c -> \b1 -> \b2 -> c b1 b2
 cond = TmAbs "c" $ TmAbs "b1" $ TmAbs "b2" $ TmApp (TmApp (TmVar "c") (TmVar "b1")) (TmVar "b2")
 
-omega :: Term
+omega :: Term -- won't be allowed in simply typed lambda calculus
 omega = TmApp (TmAbs "x" $ TmApp (TmVar "x") (TmVar "x")) (TmAbs "x" $ TmApp (TmVar "x") (TmVar "x"))
+
+z :: Term -- \z -> \s -> z
+z = TmAbs "z" $ TmAbs "s" $ TmVar "z"
+
+suc :: Term -- \z -> \s -> s (s z)
+suc = TmAbs "z" $ TmAbs "s" $ TmApp (TmVar "s") (TmApp (TmVar "s") (TmVar "z"))
 
 ex :: Term
 ex = TmApp id' $ constT "z"
