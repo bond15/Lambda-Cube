@@ -60,7 +60,7 @@ shift c d (TmApp t1 t2) = (TmApp (shift c d t1) (shift c d t2))
 ===>*
 \.\. 1 (0 4)
 -}
-
+-- total function w/o renaming
 subst :: Int -> Term -> Term -> Term
 subst j s (TmVar k) | k == j = s
 subst j s (TmVar k) | k /= j = TmVar k
