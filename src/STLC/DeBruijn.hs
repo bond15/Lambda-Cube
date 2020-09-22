@@ -14,7 +14,7 @@ data Term =
       TmVar Int
     | TmAbs Type Term
     | TmApp Term Term
-    | T deriving (Show, Eq, Ord) --naive term equality(strict representation)
+    | U deriving (Show, Eq, Ord) --naive term equality(strict representation)
 
 -- Not enforcing substructural rules like 
 -- Weakening, exchange, ...etc
@@ -32,7 +32,7 @@ typeCheck :: Ctxt -> Term -> Type -> Bool
 -------------------
  Gamma |-  T : Unit
 -}
-typeCheck ctx T Unit = True
+typeCheck ctx U Unit = True
 
 {- 
   x : T in Gamma
@@ -61,10 +61,11 @@ typeCheck ctx (TmApp (TmAbs ty1 b) t2) ty2 = let r1 = typeCheck ctx (TmAbs ty1 b
 
 typeCheck _ _ _ = False
 
+-- Properties: Decidable typing, uniqueness of typing, Preservation, Progress
 
 type Typing = Map Term Type
 getType' :: Typing -> Term -> Maybe Type
-getType' ctxt T = Just Unit
+getType' ctxt U = Just Unit
 getType' ctxt (TmVar n) = M.lookup (TmVar n) ctxt
 getType' ctxt (TmAbs ty1 b) = getType' (M.insert (TmVar $ M.size ctxt) ty1 ctxt) b  >>= \ ty2 -> Just $ Arr ty1 ty2
 getType' ctxt (TmApp t1 t2) = do
@@ -76,3 +77,10 @@ getType' ctxt (TmApp t1 t2) = do
                                 return r
 getType :: Term -> Maybe Type
 getType = getType' M.empty
+
+
+tru :: Term
+tru = TmAbs Unit $ TmAbs Unit $ TmVar 1
+
+fls :: Term
+fls = TmAbs Unit $ TmAbs Unit $ TmVar 0
