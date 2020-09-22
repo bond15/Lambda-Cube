@@ -63,10 +63,16 @@ typeCheck _ _ _ = False
 
 
 type Typing = Map Term Type
-getType :: Typing -> Term -> Maybe Type
-
-getType ctxt T = Just Unit
-getType ctxt (TmVar n) = M.lookup (TmVar n) ctxt
-getType ctxt (TmAbs ty1 b) = let r = getType (M.insert (TmVar $ M.size ctxt) ty1 ctxt) b
-                              in r >>= \ ty2 -> Just $ Arr ty1 ty2
-getType ctxt (TmApp t1 t2) = undefined
+getType' :: Typing -> Term -> Maybe Type
+getType' ctxt T = Just Unit
+getType' ctxt (TmVar n) = M.lookup (TmVar n) ctxt
+getType' ctxt (TmAbs ty1 b) = getType' (M.insert (TmVar $ M.size ctxt) ty1 ctxt) b  >>= \ ty2 -> Just $ Arr ty1 ty2
+getType' ctxt (TmApp t1 t2) = do
+                                ty12' <- getType' ctxt t1
+                                ty1' <- getType' ctxt t2
+                                r <- case ty12' of
+                                      (Arr ty1 ty2) | ty1 == ty1' -> Just ty2
+                                      _ -> Nothing 
+                                return r
+getType :: Term -> Maybe Type
+getType = getType' M.empty
