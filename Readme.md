@@ -6,8 +6,8 @@ Brief implementations of types systems of varying strength
 - Simply Typed Lambda Calculus(λ→)
     * With records
 - STLC + type operators (λω)
-- STLC + dependent types (λ2)
-- System F (λ2)
+- STLC + dependent types 
+- STLC + polymorphism - System F (λ2)
     * Predicative
     * Impredicative
 - System F Omega
@@ -27,6 +27,7 @@ Brief implementations of types systems of varying strength
 λP ω (∗, ∗) (∗,[] ) ([], [])
 λP ω (∗, ∗) ([], ∗) (∗,[] ) ([], [])
 https://www.seas.harvard.edu/courses/cs252/2016fa/15.pdf
+https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 
 ## TODO
 - Modular datatype representation (DTALC or Tagless Final) ?
