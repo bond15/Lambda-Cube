@@ -2,6 +2,7 @@
 Brief implementations of types systems of varying strength
 - Untyped Lambda Calculus
 - Simply Typed Lambda Calculus
+    * With records
 - System F
 - System F Omega
 - Dependent Type Theory
