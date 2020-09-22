@@ -1,5 +1,6 @@
 module STLC.DeBruijn where
-import Data.Set
+import Data.Set as S
+import Data.Map as M
 -- Church style typing: Types are part of the term
 -- Curry style typing: Terms are UTLC, Types are "checked"
 
@@ -38,14 +39,14 @@ typeCheck ctx T Unit = True
 -------------------
  Gamma |- x : T
 -}
-typeCheck ctx (TmVar n) ty = member ((TmVar n), ty) ctx
+typeCheck ctx (TmVar n) ty = S.member ((TmVar n), ty) ctx
 
 {-
 Gamma, x : T1 |- t2 : T2
 -------------------------------
 Gamma |- \x : T1. t2 : T1 -> T2
 -}
-typeCheck ctx (TmAbs ty1 t2) (Arr ty1' ty2) | ty1 == ty1' = typeCheck (insert (TmVar (size ctx),ty1) ctx) t2 ty2
+typeCheck ctx (TmAbs ty1 t2) (Arr ty1' ty2) | ty1 == ty1' = typeCheck (S.insert (TmVar (S.size ctx),ty1) ctx) t2 ty2
 typeCheck ctx (TmAbs ty1 t2) (Arr ty1' ty2) | ty1 /= ty1' = False
 
 {--
@@ -57,8 +58,15 @@ Gamma |- t1 t2 : T2
 typeCheck ctx (TmApp (TmAbs ty1 b) t2) ty2 = let r1 = typeCheck ctx (TmAbs ty1 b) (Arr ty1 ty2) 
                                                  r2 = typeCheck ctx t2 ty1
                                               in r1 && r2
-typeCheck ctx (TmApp t1 t2) ty2 = False
 
 typeCheck _ _ _ = False
 
 
+type Typing = Map Term Type
+getType :: Typing -> Term -> Maybe Type
+
+getType ctxt T = Just Unit
+getType ctxt (TmVar n) = M.lookup (TmVar n) ctxt
+getType ctxt (TmAbs ty1 b) = let r = getType (M.insert (TmVar $ M.size ctxt) ty1 ctxt) b
+                              in r >>= \ ty2 -> Just $ Arr ty1 ty2
+getType ctxt (TmApp t1 t2) = undefined
