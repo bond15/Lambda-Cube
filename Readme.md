@@ -1,4 +1,4 @@
-# Lambda Cube
+# Lambda Cube+
 Brief implementations of types systems of varying strength
 - Untyped Lambda Calculus
 - Simply Typed Lambda Calculus
