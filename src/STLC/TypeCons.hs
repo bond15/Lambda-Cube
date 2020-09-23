@@ -13,19 +13,30 @@ data Type =
     | Arr Type Type  -- right associative
       deriving (Show, Eq, Ord) --naive type equality(strict representation)
 
+-- STLC + Boolean + Unit + Product type + Coproduct type + Records + Variants + recursive types
+-- product types --generalize--> records a.k.a. labeled nested products
+-- coproduct types --generalize--> variants a.k.a. labeled nexted coproducts
 data Term = 
-      TmVar Int
+    -- UNITS
+     U
+    -- Boolean terms
     | Tru
     | Fls
+    -- Product introduction
     | TmProd Term Term
+    -- Product elimination
     | Pi_1 Term Type
     | Pi_2 Term Type
+    -- Coproduct introduction
     | Inj_1 Term Type
     | Inj_2 Term Type
+    -- Coproduct elimination
     | Match Term Term Term
+    -- STLC
+    | TmVar Int
     | TmAbs Type Term
     | TmApp Term Term
-    | U deriving (Show, Eq, Ord) --naive term equality(strict representation)
+      deriving (Show, Eq, Ord) --naive term equality(strict representation)
 
 -- Not enforcing substructural rules like 
 -- Weakening, exchange, ...etc
@@ -202,3 +213,11 @@ test1 :: Bool
 test1 = typeCheck S.empty leaf booltree == True
 test2 :: Bool
 test2 = typeCheck S.empty node booltree == True
+
+-- 0 ~ Fls, 1 ~ Tru
+height :: Term
+height = Match node (TmAbs Unit Fls) (TmAbs (Prod (Prod Unit Boolean) Unit) Tru)
+
+-- Add variants?
+-- recursive types , (equirecursive or isorecursive types?)
+-- https://www.cs.purdue.edu/homes/suresh/565-Spring2009/lectures/lecture-17.pdf
