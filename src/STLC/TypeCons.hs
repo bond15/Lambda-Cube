@@ -19,7 +19,7 @@ data Term =
     | Pi_2 Term Type
     | Inj_1 Term Type
     | Inj_2 Term Type
-    | Match Term Term
+    | Match Term Term Term
     | TmAbs Type Term
     | TmApp Term Term
     | U deriving (Show, Eq, Ord) --naive term equality(strict representation)
@@ -102,11 +102,16 @@ Gamma |- Inj_2 t T1 : T1 + T2
 -}
 typeCheck ctx (Inj_2 t ty1) (CProd ty1' ty2) | ty1 == ty1' = typeCheck ctx t ty2
 {- 
-Gamma |- t1 : T1 -> T3   Gamma |- t2 : T2 -> T3
--------------------------------------------
-Gamma |- Match t1 t2 : T3
+Gamma |- t1 : T1 -> T3   Gamma |- t2 : T2 -> T3  Gamma |- c : T1 + T2
+----------------------------------------------------------------------
+Gamma |- Match c t1 t2 : T3
 -}
-typeCheck ctx (Match t1 t2) ty3 = False --let r = typeCheck  -- need to get types for t1 t2
+typeCheck ctx (Match c (TmAbs ty1 b1) (TmAbs ty2 b2)) ty3 = let r1 = typeCheck ctx (TmAbs ty1 b1) (Arr ty1 ty3)
+                                                                r2 = typeCheck ctx (TmAbs ty2 b2) (Arr ty1 ty3)
+                                                                r3 = typeCheck ctx c (CProd ty1 ty2)
+                                                            in r1 && r2 && r2
+  
+  
 
 typeCheck _ _ _ = False
 
