@@ -6,7 +6,8 @@ import Data.Map as M
 
 -- Note: without base types, STLC is uninhabited
 data Type =
-      Unit 
+     Unit
+    | Boolean
     | Prod Type Type
     | CProd Type Type
     | Arr Type Type  -- right associative
@@ -14,6 +15,8 @@ data Type =
 
 data Term = 
       TmVar Int
+    | Tru
+    | Fls
     | TmProd Term Term
     | Pi_1 Term Type
     | Pi_2 Term Type
@@ -41,6 +44,19 @@ typeCheck :: Ctxt -> Term -> Type -> Bool
  Gamma |-  T : Unit
 -}
 typeCheck ctx U Unit = True
+
+{-
+
+-------------------
+Gamma |- Tru : Boolean
+ -}
+typeCheck ctx Tru Boolean = True
+{-
+
+-------------------
+Gamma |- Fls : Boolean
+ -}
+typeCheck ctx Fls Boolean = True
 
 {- 
   x : T in Gamma
@@ -120,6 +136,8 @@ typeCheck _ _ _ = False
 type Typing = Map Term Type
 getType' :: Typing -> Term -> Maybe Type
 getType' ctxt U = Just Unit
+getType' ctxt Tru = Just Boolean
+getType' ctxt Fls = Just Boolean
 getType' ctxt (TmVar n) = M.lookup (TmVar n) ctxt
 getType' ctxt (TmAbs ty1 b) = getType' (M.insert (TmVar $ M.size ctxt) ty1 ctxt) b  >>= \ ty2 -> Just $ Arr ty1 ty2
 getType' ctxt (TmApp t1 t2) = do
@@ -129,6 +147,34 @@ getType' ctxt (TmApp t1 t2) = do
                                       (Arr ty1 ty2) | ty1 == ty1' -> Just ty2
                                       _ -> Nothing 
                                 return r
+getType' ctxt (TmProd t1 t2) = do
+                                  ty1 <- getType' ctxt t1
+                                  ty2 <- getType' ctxt t2
+                                  return $ Prod ty1 ty2
+getType' ctxt (Pi_1 p ty2) = do
+                                ty12 <- getType' ctxt p
+                                r <- case ty12 of
+                                  (Prod ty1 ty2) -> Just ty1
+                                return r
+getType' ctxt (Pi_2 p ty1) = do
+                                ty12 <- getType' ctxt p
+                                r <- case ty12 of
+                                  (Prod ty1 ty2) -> Just ty2
+                                return r 
+getType' ctxt (Inj_1 c ty2) = do 
+                                ty1 <- getType' ctxt c
+                                return $ CProd ty1 ty2                                                           
+getType' ctxt (Inj_2 c ty1) = do 
+                                ty2 <- getType' ctxt c
+                                return $ CProd ty1 ty2
+getType' ctxt (Match c t1 t2) = do
+                                  tyc <- getType' ctxt c    
+                                  ty13 <- getType' ctxt t1
+                                  ty23 <- getType' ctxt t2     
+                                  r <- case (tyc,ty13,ty23) of
+                                    (CProd ty1 ty2, Arr ty1' ty3, Arr ty2' ty3')| ty1 == ty1' && ty2 == ty2' && ty3 == ty3' -> Just ty3
+                                  return r                     
+
 getType :: Term -> Maybe Type
 getType = getType' M.empty
 
@@ -138,3 +184,21 @@ tru = TmAbs Unit $ TmAbs Unit $ TmVar 1
 
 fls :: Term
 fls = TmAbs Unit $ TmAbs Unit $ TmVar 0
+
+p :: Term
+p = TmProd tru fls
+
+-- flat Bool valued tree (non recursive)
+booltree :: Type
+booltree  = CProd (Unit) (Prod (Prod Unit Boolean) Unit)
+
+leaf :: Term
+leaf = Inj_1 U (Prod (Prod Unit Boolean) Unit)
+
+node :: Term
+node = Inj_2 (TmProd (TmProd U Tru) U) Unit
+
+test1 :: Bool
+test1 = typeCheck S.empty leaf booltree == True
+test2 :: Bool
+test2 = typeCheck S.empty node booltree == True

@@ -6,6 +6,7 @@ Brief implementations of types systems of varying strength
 - Simply Typed Lambda Calculus(λ→)
     * With records
 - STLC + type operators (λω)
+    * with Recursive types
 - STLC + dependent types 
 - STLC + polymorphism - System F (λ2)
     * Predicative
