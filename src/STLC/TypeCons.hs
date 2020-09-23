@@ -1,4 +1,5 @@
 module STLC.TypeCons where
+import Prelude as P
 import Data.Set as S
 import Data.Map as M
 -- Church style typing: Types are part of the term
@@ -9,6 +10,7 @@ data Type =
      Unit
     | Boolean
     | Prod Type Type
+    | Record [(String, Type)]
     | CProd Type Type
     | Arr Type Type  -- right associative
       deriving (Show, Eq, Ord) --naive type equality(strict representation)
@@ -27,6 +29,10 @@ data Term =
     -- Product elimination
     | Pi_1 Term Type
     | Pi_2 Term Type
+    -- Record introduction
+    | RI [(String,Term)] -- No condition on welformed, distinct naming (shadowed)
+    -- Record elimination
+    | RE Term String
     -- Coproduct introduction
     | Inj_1 Term Type
     | Inj_2 Term Type
@@ -44,6 +50,8 @@ type Ctxt = Set (Term, Type)
 
 isVal :: Term -> Bool
 isVal (TmAbs _ _) = True
+-- Records are values
+isVal (RI _) = True
 isVal _ = False
 
 -- alternative, define a getType operation instead of a check operation
@@ -115,6 +123,24 @@ Gamma |- p : Prod T1 T2
 Gamma |- Pi_2 p T1 : T2
 -}                                              
 typeCheck ctx (Pi_2 p ty1) ty2 = typeCheck ctx p (Prod ty1 ty2)
+{-
+Gamma |- t1 : T1 ... Gamma |- tn : Tn
+---------------------------------------------------------------------
+Gamma |- RI [(s1, t1), (s2, t2)... (sn, tn)] : [(s1, T1)...(sn, Tn)]
+-}
+typeCheck ctx (RI terms) (Record types) = check terms types where
+                                 check ((s1,trm):[]) ((s2,typ):[]) | s1 == s2 = typeCheck ctx trm typ
+                                 check ((s1,trm):trms) ((s2,typ):typs)| s1 == s2 = typeCheck ctx trm typ && check trms typs
+{- 
+(si,ti) in record    Gamma |- ti : Ti
+--------------------------------------
+Gamma |- RE record si : Ti 
+-}
+typeCheck ctx (RE (RI record) si) typi = maybe False (\r -> typeCheck ctx r typi) (find si record) where
+                                            find s [] = Nothing
+                                            find s ((s1,trm):trms) | s == s1 = Just trm
+                                            find s ((s1,trm):trms) | s /= s1 = find s trms
+                                            
 
 {- 
 Gamma |- t : T1
@@ -172,6 +198,16 @@ getType' ctxt (Pi_2 p ty1) = do
                                 r <- case ty12 of
                                   (Prod ty1 ty2) -> Just ty2
                                 return r 
+
+getType' ctxt (RI terms) = (sequence $ P.map (\(s,t) -> (getType' ctxt t) >>= (\ty -> Just (s,ty))) terms) >>= (\r -> Just $ Record r)
+getType' ctxt (RE record s) = do
+                                tyrec <- getType' ctxt record 
+                                r <- case tyrec of 
+                                  (Record typs) -> find s typs where
+                                                   find s [] = Nothing
+                                                   find s ((s',ty):xs)| s' == s = Just ty
+                                                   fins s ((s',ty):xs) = find s xs
+                                return r
 getType' ctxt (Inj_1 c ty2) = do 
                                 ty1 <- getType' ctxt c
                                 return $ CProd ty1 ty2                                                           
