@@ -7,7 +7,7 @@ Brief implementations of types systems of varying strength
     * With records
 - STLC + type operators (λω)
     * with Recursive types
-- STLC + dependent types 
+- STLC + dependent types (λΠ)
 - STLC + polymorphism - System F (λ2)
     * Predicative
     * Impredicative
