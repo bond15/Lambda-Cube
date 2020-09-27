@@ -49,7 +49,7 @@ extra-source-files:  CHANGELOG.md
 
 library
   -- Modules exported by the library.
-  exposed-modules:     UTLC.Named, UTLC.Eval, UTLC.DeBruijn, UTLC.Examples, STLC.DeBruijn, STLC.TypeCons, STLC.Recursive
+  exposed-modules:     UTLC.Named, UTLC.Eval, UTLC.DeBruijn, UTLC.Examples, STLC.DeBruijn, STLC.TypeCons, STLC.Recursive, SystemF.DeBruijn
 
   -- Modules included in this library but not exported.
   -- other-modules:
