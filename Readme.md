@@ -35,3 +35,7 @@ https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 ## TODO
 - Modular datatype representation (DTALC or Tagless Final) ?
 - Church vs Curry (Cedille)
+- Use monad with more visibility for errors (not Maybe)
+- Fix type level substitution
+- tests
+- modular frontend language (parsec)
