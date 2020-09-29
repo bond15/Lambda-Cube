@@ -15,13 +15,8 @@ Brief implementations of types systems of varying strength
 - Dependent Type Theory ?
 - Calculus of Constructions
 
-## Others
-- Martin Lof Type Theory
-- Cubical Type Theory
-- Dotty?
 
-
-
+#### Map the names to these PTS 'dependency' representation.
 - λ → (∗, ∗) 
 - λ2 (∗, ∗) ([], ∗)
 - λP (∗, ∗) (∗,[] )
@@ -30,6 +25,17 @@ Brief implementations of types systems of varying strength
 - λω (∗, ∗) ([], ∗) ([],[] )
 - λP ω (∗, ∗) (∗,[] ) ([], [])
 - λP ω (∗, ∗) ([], ∗) (∗,[] ) ([], [])
+
+## Others
+- Martin Lof Type Theory
+- Cubical Type Theory
+- Modal Dependent TT
+- Observational TT
+- Dotty?
+
+
+
+
 https://www.seas.harvard.edu/courses/cs252/2016fa/15.pdf
 https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 
