@@ -18,17 +18,18 @@ Brief implementations of types systems of varying strength
 ## Others
 - Martin Lof Type Theory
 - Cubical Type Theory
+- Dotty?
 
 
 
-λ → (∗, ∗) 
-λ2 (∗, ∗) ([], ∗)
-λP (∗, ∗) (∗,[] )
-λP2 (∗, ∗) ([], ∗) (∗, [])
-λω (∗, ∗) ([],[] )
-λω (∗, ∗) ([], ∗) ([],[] )
-λP ω (∗, ∗) (∗,[] ) ([], [])
-λP ω (∗, ∗) ([], ∗) (∗,[] ) ([], [])
+- λ → (∗, ∗) 
+- λ2 (∗, ∗) ([], ∗)
+- λP (∗, ∗) (∗,[] )
+- λP2 (∗, ∗) ([], ∗) (∗, [])
+- λω (∗, ∗) ([],[] )
+- λω (∗, ∗) ([], ∗) ([],[] )
+- λP ω (∗, ∗) (∗,[] ) ([], [])
+- λP ω (∗, ∗) ([], ∗) (∗,[] ) ([], [])
 https://www.seas.harvard.edu/courses/cs252/2016fa/15.pdf
 https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 

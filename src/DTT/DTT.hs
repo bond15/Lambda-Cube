@@ -253,3 +253,19 @@ recall
 =   Lam (Lam (Bound 1)) 
 
 -}
+
+{-
+TODO
+add Nat
+add Vec
+    as a practive for exploring elimination of dep types with a motive
+add Eq
+
+Questions:
+    with dependent types, adding TApp and TAbs (polymorphims)
+    isnt needed?
+    what about kind KAbs and KApp?
+
+    
+
+-}
