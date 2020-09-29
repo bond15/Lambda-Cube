@@ -39,7 +39,8 @@ Brief implementations of types systems of varying strength
 - https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 - https://www.andres-loeh.de/LambdaPi/LambdaPi.pdf
    * Intro to Lambda PI (demonstrates engineering niceties like Bidirectional type checking, locall nameless representaiton, higher order abstract syntax)
--http://www.cse.chalmers.se/~ulfn/papers/thesis.pdf
+   
+- http://www.cse.chalmers.se/~ulfn/papers/thesis.pdf
    *  Ulf Thesis (Agda)
 
 
