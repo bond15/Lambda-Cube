@@ -1,4 +1,4 @@
-module DTT.STLC where
+module DTT.DTT where
 import Control.Monad ( unless )
 import Control.Monad.Except (throwError)
 
@@ -38,11 +38,24 @@ import Control.Monad.Except (throwError)
 -- ABSTRACT SYNTAX--
 --------------------
 
+{-
+DTT Changes
+- "Everything is a term" the term,type,kind deliniation blurs
+- Thus, Evaluation is now for terms and types
+- Evaluation is in type checking
+-}
+
+
+-- no longer require Type and Kind
 data Term_up = -- (infer)
-      Ann Term_dwn Type -- annotated term
+    -- previously: Ann Term_dwn Type (but now types are also terms)
+      Ann Term_dwn Term_dwn 
     | Bound Int
     | Free Name
-    | Term_up :@: Term_dwn -- application
+    | Term_up :@: Term_dwn
+    -- new
+    | Star
+    | Pi Term_dwn Term_dwn
       deriving (Show, Eq)
 
 
@@ -58,10 +71,7 @@ data Name =  -- locally nameless
     | Quote Int -- used for quoting 
       deriving (Show, Eq)
 
-data Type = 
-      TFree Name
-    | Fun Type Type
-      deriving(Show, Eq)
+
 
 {-
  values as 
@@ -75,6 +85,9 @@ data Type =
 data Value =
       VLam (Value -> Value) -- using host (haskell) language functions
     | VNeutral Neutral
+    -- new
+    | VStar
+    | VPi Value (Value -> Value)
 
 -- ex constant function
 -- const x y = x -- haskell
@@ -107,6 +120,10 @@ eval_up (Bound i) d = d !! i
 -- eval separatly then apply
 eval_up (e :@: e') d = vapp (eval_up e d) (eval_dwn e' d)
 
+--new
+eval_up Star d = VStar
+eval_up (Pi rho1 rho2) d = (VPi (eval_dwn rho1 d) (\x -> eval_dwn rho2 (x : d)))
+
 vapp :: Value -> Value -> Value
 vapp (VLam f) v = f v -- use haskells evaluator
 vapp (VNeutral n) v = VNeutral (NApp n v)
@@ -121,17 +138,8 @@ eval_dwn (Lam e) d = VLam(\x -> eval_dwn e (x : d))
 
 
 
-
-data Kind =
-      Star 
-      deriving(Show)
-
-data Info = 
-      HasKind Kind
-    | HasType Type
-      deriving(Show)
-
-type Context = [(Name, Info)]
+type Type = Value
+type Context = [(Name, Type)]
 
 
 -------------------
@@ -143,14 +151,7 @@ type Result a = Either String a
 -- type_up returns a type -- infer
 -- type_down returns () -- check
 
-kind_dwn :: Context -> Type -> Kind -> Result ()
--- does this free type name exist in the context?
-kind_dwn gamma (TFree x) Star = case lookup x gamma of
-                                    Just (HasKind Star) -> return ()
-                                    Nothing -> throwError "Unknown identifier"
-kind_dwn gamma (Fun k k') Star = do
-                                   kind_dwn gamma k Star
-                                   kind_dwn gamma k' Star
+
 
 type_up_zero :: Context -> Term_up -> Result Type
 type_up_zero = type_up 0
@@ -158,15 +159,15 @@ type_up_zero = type_up 0
 
 type_up :: Int -> Context -> Term_up -> Result Type
 -- annotated
--- check the type is kind
--- check the term e is of type t
-type_up i gamma (Ann e t) = do
-                              kind_dwn gamma t Star
-                              type_dwn i gamma e t
-                              return t
+-- evaluate the type in the empty context
+type_up i gamma (Ann e rho) = do
+                                type_dwn i gamma rho VStar
+                                let t = eval_dwn rho []
+                                type_dwn i gamma e t
+                                return t
 -- see if the type of the free variable is in the context                           
 type_up i gamma (Free x) = case lookup x gamma of
-                             Just (HasType t) -> return t
+                             Just t -> return t
                              Nothing -> throwError "Unknown Identifier"
 type_up i gamma (e :@: e') = do 
                                -- infer the type of e
@@ -175,22 +176,30 @@ type_up i gamma (e :@: e') = do
                                    -- if e is a funtion type,
                                    --  check that the argument type is compatible
                                    --  if it is, return result type of application
-                                   Fun t t' -> do type_dwn i gamma e' t ;; return t'
+                                   VPi t t' -> do type_dwn i gamma e' t 
+                                                  return (t' (eval_dwn e' []))
                                    _ -> throwError "Illegal Application"
+-- new
+type_up i gamma Star = return VStar
+type_up i gamma (Pi r r') = do type_dwn i gamma r VStar
+                               let t = eval_dwn r []
+                               type_dwn (i + 1) ((Local i,t) : gamma)
+                                    (subst_dwn 0 (Free (Local i)) r') VStar
+                               return VStar
 
 
 
 type_dwn :: Int -> Context -> Term_dwn -> Type -> Result ()
 -- check the infered type
-type_dwn i gamma (Inf e) t = do 
-                               t'<- type_up i gamma e
-                               unless(t == t')(throwError "type mismatch")
+type_dwn i gamma (Inf e) v = do 
+                               v'<- type_up i gamma e
+                               unless(quote_z v == quote_z v')(throwError "type mismatch")
 -- check that lambda has function type
 -- add binder to context with type
 -- check the body with expanded context
-type_dwn i gamma (Lam e) (Fun t t') = 
-    type_dwn (i + 1) ((Local i,HasType t) : gamma) 
-        (subst_dwn 0 (Free (Local i)) e) t'
+type_dwn i gamma (Lam e) (VPi t t') = 
+    type_dwn (i + 1) ((Local i, t) : gamma) 
+        (subst_dwn 0 (Free (Local i)) e) (t' (vfree (Local i)))
 
 type_dwn i gamma _ _ = throwError "type mismatch"                             
     
@@ -199,6 +208,9 @@ subst_up i r (Ann e t) = Ann (subst_dwn i r e) t
 subst_up i r (Bound j) = if i == j then r else Bound j
 subst_up i r (Free y) = Free y
 subst_up i r (e :@: e') = subst_up i r (e :@: subst_dwn i r e')
+--new
+subst_up i r Star = Star
+subst_up i r (Pi t t') = Pi (subst_dwn i r t) (subst_dwn (i + 1) r t')
 
 subst_dwn :: Int -> Term_up -> Term_dwn -> Term_dwn
 subst_dwn i r (Inf e) = Inf (subst_up i r e)
@@ -216,6 +228,9 @@ quote_z = quote 0
 quote :: Int -> Value -> Term_dwn
 quote i (VLam f) = Lam (quote (i + 1) (f (vfree (Quote i))))
 quote i (VNeutral n) = Inf (neutralQuote i n)
+-- new
+quote i VStar = Inf Star
+quote i (VPi v f) = Inf (Pi (quote i v) (quote (i + 1) (f (vfree (Quote i)))))
 
 neutralQuote :: Int -> Neutral -> Term_up
 neutralQuote i (NFree x) = boundfree i x
