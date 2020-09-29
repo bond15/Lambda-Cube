@@ -34,10 +34,14 @@ Brief implementations of types systems of varying strength
 - Dotty?
 
 
+## Sources
+- https://www.seas.harvard.edu/courses/cs252/2016fa/15.pdf
+- https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
+- https://www.andres-loeh.de/LambdaPi/LambdaPi.pdf
+   * Intro to Lambda PI (demonstrates engineering niceties like Bidirectional type checking, locall nameless representaiton, higher order abstract syntax)
+-http://www.cse.chalmers.se/~ulfn/papers/thesis.pdf
+   *  Ulf Thesis (Agda)
 
-
-https://www.seas.harvard.edu/courses/cs252/2016fa/15.pdf
-https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf
 
 ## TODO
 - Modular datatype representation (DTALC or Tagless Final) ?
