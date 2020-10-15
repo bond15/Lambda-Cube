@@ -12,7 +12,7 @@ Brief implementations of types systems of varying strength
     * Predicative
     * Impredicative
 - System F Omega
-- Dependent Type Theory ?
+- Dependent Type Theory :white_check_mark:
 - Calculus of Constructions
 
 
