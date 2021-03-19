@@ -58,7 +58,7 @@ library
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:       base ^>=4.14.0.0, containers, mtl
+  build-depends:       base ^>=4.14.0.0, containers, mtl, transformers-base
 
   -- Directories containing source files.
   hs-source-dirs:      src

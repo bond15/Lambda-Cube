@@ -261,11 +261,15 @@ add Vec
     as a practive for exploring elimination of dep types with a motive
 add Eq
 
+universes?
+    see Ulf Thesis
+        http://www.cse.chalmers.se/~ulfn/papers/thesis.pdf
+
 Questions:
     with dependent types, adding TApp and TAbs (polymorphims)
     isnt needed?
     what about kind KAbs and KApp?
 
-    
+
 
 -}
