@@ -42,6 +42,9 @@ Brief implementations of types systems of varying strength
    
 - http://www.cse.chalmers.se/~ulfn/papers/thesis.pdf
    *  Ulf Thesis (Agda)
+   
+- https://www.semanticscholar.org/reader/6d2eb533669ee63b77d059f2087a48594f498b8a
+   * Pi forall
 
 
 ## TODO
